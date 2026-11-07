@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAGE Business Solutions | Business Mentors, Kolhapur</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Archivo:wght@700;800&family=Instrument+Serif:ital@0;1&family=Playfair+Display:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { navy:'#0F1B2D', slate2:'#1E2A3F', gold:'#B8893B', bronze:'#8C6A2F', cream:'#FAF7F2' },
+    fontFamily: { serif:['"Playfair Display"','serif'], sans:['Inter','sans-serif'] }
+  } } }
+</script>
+<style>
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',sans-serif;color:#0F1B2D;background:#fff}
+  body.loading{overflow:hidden}
+  .mask{overflow:hidden;display:inline-block}
+  .gold-text{background:linear-gradient(90deg,#B8893B,#E3C07A,#8C6A2F);-webkit-background-clip:text;background-clip:text;color:transparent}
+  :focus-visible{outline:2px solid #B8893B;outline-offset:3px}
+
+  /* ---------- Inhibitors (pinned) ---------- */
+  #inh{position:relative;height:100vh;height:100svh;overflow:hidden;background:#ECECEE;
+       background-image:radial-gradient(#b9b9c0 1px,transparent 1.2px);background-size:22px 22px}
+  .arrow{position:absolute;left:0;top:0;width:clamp(120px,22vw,300px);opacity:.9;pointer-events:none;will-change:transform}
+  .panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+         gap:clamp(.8rem,2.5vh,2rem);padding:76px 20px 56px;pointer-events:none;visibility:hidden}
+  .panel.on{pointer-events:auto}
+  @media(min-width:1024px){.panel{flex-direction:row-reverse;gap:6vw;padding:90px 6vw 40px}}
+  .circ{position:relative;flex:none;width:min(74vw,38vh,470px);aspect-ratio:1}
+  @media(min-width:1024px){.circ{width:min(40vw,66vh,520px)}}
+  .ring{position:absolute;inset:0;border:2px dashed #0F1B2D;border-radius:50%;animation:spin 40s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .disc{position:absolute;inset:6%;border-radius:50%;overflow:hidden;background:#fff;box-shadow:0 30px 50px -20px rgba(15,27,45,.35)}
+  .disc img{width:100%;height:100%;object-fit:contain;padding:6%}
+  .disc img.cover{object-fit:cover;padding:0}
+  .txt{width:100%;max-width:520px;text-align:center}
+  @media(min-width:1024px){.txt{text-align:left}}
+  .t1{font-family:'Archivo',sans-serif;font-weight:800;letter-spacing:-.02em;line-height:1;font-size:clamp(1.9rem,6.5vw,3.6rem);color:#0F1B2D}
+  .t2{font-family:'Instrument Serif',serif;font-style:italic;line-height:1.05;font-size:clamp(1.5rem,5vw,2.8rem);color:#8C6A2F}
+  .num{font-family:'Instrument Serif',serif;font-style:italic;color:#B8893B}
+  .box{margin-top:clamp(.7rem,2vh,1.4rem);background:rgba(255,255,255,.82);backdrop-filter:blur(8px);border:1px solid rgba(15,27,45,.12);
+       border-radius:18px;padding:14px 16px;text-align:left;box-shadow:0 18px 40px -22px rgba(15,27,45,.4)}
+  .tabs{display:flex;gap:6px;margin-bottom:10px}
+  .tab{font-size:.78rem;font-weight:600;padding:6px 12px;border-radius:999px;background:transparent;color:#0F1B2D;border:1px solid rgba(15,27,45,.2);cursor:pointer;transition:.25s}
+  .tab.on{background:#0F1B2D;color:#fff;border-color:#0F1B2D}
+  .tc{font-size:.88rem;line-height:1.5;color:#334155}
+  .tc[hidden]{display:none}
+  .tc ul{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+  .tc li{display:flex;gap:8px}
+  .tc li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:#B8893B;margin-top:.5em}
+  .tc .tag{margin-top:8px;font-weight:600;color:#0F1B2D;font-size:.82rem}
+  #dots{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:5}
+  #dots button{width:10px;height:10px;border-radius:50%;background:#0F1B2D33;border:0;cursor:pointer;transition:.3s}
+  #dots button.on{background:#B8893B;transform:scale(1.5)}
+  #inh.static{height:auto;overflow:visible}
+  #inh.static .panel{position:relative;visibility:visible;pointer-events:auto;min-height:100vh}
+  #inh.static #dots,#inh.static .arrow{display:none}
+</style>
+</head>
+<body class="loading">
+
+<!-- LOADER -->
+<div id="loader" class="fixed inset-0 z-[100] bg-[#f7f7f7] flex flex-col items-center justify-center">
+  <div class="grid place-items-center">
+    <img id="l-logo" src="logo_2642b9.jpeg" alt="SAGE Business Mentor" class="h-56 sm:h-72 w-auto opacity-0" style="grid-area:1/1">
+    <div class="flex font-extrabold text-7xl sm:text-9xl md:text-[10rem] tracking-[0.08em]" style="grid-area:1/1;font-family:'Archivo',sans-serif">
+      <span class="mask"><span class="l-letter inline-block" style="color:#DC3C7C">S</span></span>
+      <span class="mask"><span class="l-letter inline-block" style="color:#757573">A</span></span>
+      <span class="mask"><span class="l-letter inline-block" style="color:#757573">G</span></span>
+      <span class="mask"><span class="l-letter inline-block" style="color:#757573">E</span></span>
+    </div>
+  </div>
+  <p id="l-sub" class="mt-4 text-xs sm:text-sm tracking-[0.4em] uppercase opacity-0" style="color:#757573">Business Mentor</p>
+  <div class="mt-10 w-48 sm:w-64 h-px overflow-hidden" style="background:#75757333"><div id="l-bar" class="h-full w-full origin-left scale-x-0" style="background:#DC3C7C"></div></div>
+  <span id="l-count" class="mt-4 text-xs tracking-widest" style="color:#757573">0%</span>
+</div>
+
+<!-- NAV -->
+<header id="nav" class="fixed top-0 inset-x-0 z-50 backdrop-blur transition-colors duration-300">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
+    <a href="#home" aria-label="SAGE Business Mentor home" class="bg-[#f7f7f7] rounded px-2 py-1 flex"><img src="logo_2642b9.jpeg" alt="SAGE Business Mentor" class="h-9 w-auto"></a>
+    <nav class="hidden md:flex gap-10 text-sm text-white/80">
+      <a href="#inh" class="hover:text-gold transition">Inhibitors</a>
+      <a href="#approach" class="hover:text-gold transition">Our approach</a>
+      <a href="#contact" class="hover:text-gold transition">Contact</a>
+    </nav>
+    <a href="#contact" class="hidden md:inline-block border border-gold text-gold px-6 py-2 text-sm hover:bg-gold hover:text-navy transition">Book a session</a>
+    <button id="menuBtn" class="md:hidden text-white" aria-label="Open menu"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h20M4 14h20M4 20h20"/></svg></button>
+  </div>
+  <div id="mobileMenu" class="hidden md:hidden bg-navy px-6 pb-6 pt-2 text-white/90 space-y-4">
+    <a href="#inh" class="block">Inhibitors</a><a href="#approach" class="block">Our approach</a><a href="#contact" class="block text-gold">Contact</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section id="home" class="relative min-h-screen bg-navy overflow-hidden flex items-center pt-24 pb-16">
+  <div class="absolute -top-40 -right-40 w-[30rem] h-[30rem] rounded-full bg-gold/10 blur-3xl"></div>
+  <div class="absolute bottom-0 -left-32 w-[26rem] h-[26rem] rounded-full bg-slate2 blur-3xl"></div>
+  <div class="relative max-w-7xl mx-auto px-5 md:px-8 grid lg:grid-cols-2 gap-12 items-center w-full">
+    <div>
+      <div class="hero-fade inline-block bg-[#f7f7f7] p-3 mb-8"><img src="logo_2642b9.jpeg" alt="SAGE Business Mentor logo" class="h-24 sm:h-28 w-auto"></div>
+      <h1 id="heroTitle" class="font-serif text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-bold text-white leading-[1.15]">
+        If your <span class="gold-text">Business Growth</span> is slowing due to overlooking some inhibitors like...
+      </h1>
+      <p class="hero-fade mt-6 text-white/70 max-w-lg text-base sm:text-lg font-light">Critical issues left alone quietly drain family businesses and long partnerships. A trustworthy, confidential mentor helps you resolve them in time.</p>
+      <div class="hero-fade mt-9 flex flex-wrap gap-4">
+        <a href="#inh" class="bg-gold text-navy font-semibold px-8 py-3.5 hover:bg-white transition">See the inhibitors</a>
+        <a href="#contact" class="border border-white/30 text-white px-8 py-3.5 hover:border-gold hover:text-gold transition">Talk to a mentor</a>
+      </div>
+    </div>
+    <div class="hero-img relative">
+      <div class="absolute inset-0 translate-x-4 translate-y-4 border border-gold/50"></div>
+      <div class="relative bg-white p-4 sm:p-6"><img src="initial_image_1.jpeg" alt="Team lifting a business growth chart" class="w-full h-auto max-h-[480px] object-contain" onerror="this.style.display='none'"></div>
+    </div>
+  </div>
+</section>
+
+<!-- INTRO -->
+<section class="bg-[#ECECEE] py-20 px-5 text-center" style="background-image:radial-gradient(#b9b9c0 1px,transparent 1.2px);background-size:22px 22px">
+  <h2 class="t1 mx-auto max-w-3xl">Five inhibitors that slow growth</h2>
+  <p class="t2 mt-2">scroll to look at each one</p>
+</section>
+
+<!-- INHIBITORS: pinned zoom sequence -->
+<section id="inh" aria-label="Five business inhibitors">
+  <svg class="arrow" id="arr1" viewBox="0 0 300 160"><path d="M0 130 L120 40 L140 80 L220 50 L200 20 L300 60 L210 150 L200 110 L130 130 L110 100 Z" fill="#0F1B2D" opacity=".85"/></svg>
+  <svg class="arrow" id="arr2" viewBox="0 0 300 160"><path d="M0 130 L120 40 L140 80 L220 50 L200 20 L300 60 L210 150 L200 110 L130 130 L110 100 Z" fill="#B8893B" opacity=".7"/></svg>
+  <div id="stage"></div>
+  <div id="dots" role="tablist" aria-label="Inhibitors"></div>
+</section>
+
+<!-- APPROACH -->
+<section id="approach" class="py-20 md:py-28 bg-navy text-white">
+  <div class="max-w-5xl mx-auto px-5 md:px-8 text-center">
+    <h2 class="font-serif text-3xl md:text-5xl font-bold leading-tight reveal">It is mandatory to eliminate all of them <span class="gold-text">in time.</span></h2>
+    <p class="mt-6 text-white/70 text-lg font-light max-w-2xl mx-auto reveal">A trustworthy and responsible business mentor can be your way out.</p>
+    <div class="mt-14 grid md:grid-cols-3 gap-6 text-left">
+      <div class="reveal border border-white/10 p-7"><h3 class="font-semibold mb-2 text-gold">Confidential</h3><p class="text-white/60 text-sm">Sensitive family and boardroom matters stay private.</p></div>
+      <div class="reveal border border-white/10 p-7"><h3 class="font-semibold mb-2 text-gold">Trustworthy</h3><p class="text-white/60 text-sm">An independent voice every stakeholder can rely on.</p></div>
+      <div class="reveal border border-white/10 p-7"><h3 class="font-semibold mb-2 text-gold">Experienced</h3><p class="text-white/60 text-sm">Practical guidance for real succession and boardroom challenges.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="py-20 md:py-28 bg-cream">
+  <div class="max-w-5xl mx-auto px-5 md:px-8">
+    <div class="bg-white shadow-xl border-t-4 border-gold p-8 md:p-14 reveal">
+      <h2 class="font-serif text-3xl md:text-4xl font-bold mb-2">Confidential, trustful &amp; experienced business mentor</h2>
+      <p class="text-slate-500 mb-10">SAGE Business Solutions</p>
+      <div class="grid sm:grid-cols-3 gap-8 text-sm">
+        <div><h4 class="font-semibold text-bronze mb-2">Address</h4><p class="leading-relaxed">'Atharva Vishwa', Tarabai Park,<br>Kolhapur</p></div>
+        <div><h4 class="font-semibold text-bronze mb-2">Phone</h4><p class="leading-relaxed"><a href="tel:02312669320" class="hover:text-gold">(0231) 266 9320</a><br><a href="tel:+919890014273" class="hover:text-gold">Cell: 98900 14273</a></p></div>
+        <div><h4 class="font-semibold text-bronze mb-2">Email</h4><p class="break-all"><a href="mailto:mahajanigirish@gmail.com" class="hover:text-gold">mahajanigirish@gmail.com</a></p></div>
+      </div>
+      <a href="mailto:mahajanigirish@gmail.com" class="inline-block mt-10 bg-navy text-white px-8 py-3.5 hover:bg-gold hover:text-navy transition">Write to us</a>
+    </div>
+  </div>
+</section>
+<footer class="bg-navy text-white/50 text-xs text-center py-8">&copy; <span id="yr"></span> SAGE Business Solutions, Kolhapur. All rights reserved.</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+document.getElementById('yr').textContent = new Date().getFullYear();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---- Content for the five inhibitors ---- */
+const DATA = [
+  { img:'egotism_1.jpeg', cover:true, a:'Egotism', b:'in board members',
+    why:'When ego outranks the agenda, decisions stall and strategy turns into a contest of personalities.',
+    help:['Lead neutral, confidential board conversations','Move the focus from who is right to what the business needs','Agree simple decision rules everyone signs up to'] },
+  { img:'2_1.jpeg', a:'Undefined', b:'succession plan',
+    why:'Without a clear handover of the torch, continuity, confidence and family harmony are all at risk.',
+    help:['Map roles and the readiness of the next generation','Set a realistic handover timeline','Coach the founder and the successor together'] },
+  { img:'3_1.jpeg', a:'Indifferent boardroom', b:'atmosphere',
+    why:'A passive, disengaged boardroom drains energy and ideas long before numbers show it.',
+    help:['Redesign the agenda and the meeting rhythm','Give each member a clear role and questions to own','Track decisions and follow-ups until they close'] },
+  { img:'4_1.jpeg', cover:true, a:'Poor conflict management', b:'in family business',
+    why:'Unresolved disputes pull the boat in opposite directions, and family and business issues get mixed up.',
+    help:['Separate family matters from business matters','Hold structured, confidential conversations','Put agreed rules in writing so they last'] },
+  { img:'5_1.jpeg', a:'Limiting beliefs', b:'of top managers',
+    why:'Fixed beliefs at the top keep the whole organisation under a glass dome.',
+    help:['Surface hidden beliefs with guided questions','Test them against facts and market evidence','Run small experiments to build new habits'] }
+];
+const N = DATA.length;
+const stage = document.getElementById('stage'), dots = document.getElementById('dots');
+DATA.forEach((d,i)=>{
+  stage.insertAdjacentHTML('beforeend', `
+  <div class="panel" data-i="${i}">
+    <div class="circ"><div class="ring"></div><div class="disc"><img class="${d.cover?'cover':''}" src="${d.img}" alt="${d.a} ${d.b}"></div></div>
+    <div class="txt">
+      <h3><span class="num t1">${i+1}.</span> <span class="t1 p-a">${d.a}</span><br><span class="t2 p-b">${d.b}</span></h3>
+      <div class="box">
+        <div class="tabs" role="tablist">
+          <button class="tab on" role="tab" aria-selected="true" data-t="help">How SAGE helps</button>
+          <button class="tab" role="tab" aria-selected="false" data-t="why">Why it hurts</button>
+        </div>
+        <div class="tc" data-c="help"><ul>${d.help.map(h=>`<li>${h}</li>`).join('')}</ul><p class="tag">Resolved in time, before the damage is done.</p></div>
+        <div class="tc" data-c="why" hidden><p>${d.why}</p></div>
+      </div>
+    </div>
+  </div>`);
+  dots.insertAdjacentHTML('beforeend', `<button aria-label="Go to inhibitor ${i+1}" data-i="${i}"></button>`);
+});
+
+/* Tabs inside description box */
+stage.addEventListener('click', e=>{
+  const t = e.target.closest('.tab'); if(!t) return;
+  const box = t.closest('.box');
+  box.querySelectorAll('.tab').forEach(b=>{const on=b===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
+  box.querySelectorAll('.tc').forEach(c=>{
+    const show = c.dataset.c===t.dataset.t; c.hidden=!show;
+    if(show) gsap.fromTo(c,{opacity:0,y:8},{opacity:1,y:0,duration:.35});
+  });
+});
+
+/* Mobile menu + nav */
+const mm = document.getElementById('mobileMenu');
+document.getElementById('menuBtn').onclick = ()=>mm.classList.toggle('hidden');
+mm.querySelectorAll('a').forEach(a=>a.onclick=()=>mm.classList.add('hidden'));
+ScrollTrigger.create({start:80,end:99999,onToggle:s=>document.getElementById('nav').classList.toggle('bg-navy/95',s.isActive)});
+
+/* Hero title split */
+const title = document.getElementById('heroTitle');
+[...title.childNodes].forEach(n=>{
+  const cls = n.nodeType===1 ? n.className : '';
+  const words = n.textContent.split(/\s+/).filter(Boolean);
+  n.remove();
+  words.forEach(w=>{
+    const m=document.createElement('span'); m.className='mask align-bottom';
+    m.innerHTML=`<span class="w inline-block ${cls}">${w}&nbsp;</span>`; title.appendChild(m);
+  });
+});
+
+/* Loader + hero intro */
+if(reduce){
+  document.getElementById('loader').remove(); document.body.classList.remove('loading');
+}else{
+  gsap.set('.w',{yPercent:110}); gsap.set('.hero-fade',{y:30,opacity:0});
+  gsap.set('.hero-img',{scale:.92,opacity:0}); gsap.set('.l-letter',{yPercent:110}); gsap.set('#l-logo',{scale:.92});
+  const c={v:0}, tl=gsap.timeline();
+  tl.to('#l-logo',{opacity:1,scale:1,duration:.9,ease:'power3.out'})
+    .to('#l-logo',{opacity:0,scale:1.06,duration:.5,ease:'power2.in'},'+=.6')
+    .to('.l-letter',{yPercent:0,duration:1,ease:'power4.out',stagger:.12})
+    .to('#l-sub',{opacity:1,y:-4,duration:.6},'-=.4')
+    .to('#l-bar',{scaleX:1,duration:3,ease:'power2.inOut'},.3)
+    .to(c,{v:100,duration:3,ease:'power2.inOut',onUpdate:()=>document.getElementById('l-count').textContent=Math.round(c.v)+'%'},.3)
+    .to('.l-letter',{yPercent:-110,duration:.7,ease:'power3.in',stagger:.06},'+=.3')
+    .to(['#l-sub','#l-bar','#l-count'],{opacity:0,duration:.3},'<')
+    .to('#loader',{yPercent:-100,duration:1,ease:'expo.inOut',onComplete:()=>{document.getElementById('loader').remove();document.body.classList.remove('loading')}})
+    .to('.w',{yPercent:0,duration:1,ease:'power4.out',stagger:.06},'-=.4')
+    .to('.hero-fade',{y:0,opacity:1,duration:.8,stagger:.12,ease:'power3.out'},'-=.7')
+    .to('.hero-img',{scale:1,opacity:1,duration:1.2,ease:'power3.out'},'-=1');
+}
+
+/* Simple reveals for the lower sections */
+if(!reduce) gsap.utils.toArray('.reveal').forEach(el=>gsap.from(el,{y:40,opacity:0,duration:.9,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%'}}));
+
+/* ---- Pinned zoom in / zoom out sequence ---- */
+const inh = document.getElementById('inh');
+const panels = gsap.utils.toArray('.panel');
+const dotEls = [...dots.children];
+function setActive(i){
+  panels.forEach((p,k)=>p.classList.toggle('on',k===i));
+  dotEls.forEach((d,k)=>d.classList.toggle('on',k===i));
+}
+if(reduce){
+  inh.classList.add('static');
+}else{
+  setActive(0);
+  gsap.set(panels,{autoAlpha:0});
+  gsap.set('#arr1',{x:'-30vw',y:'80vh',rotate:-25});
+  gsap.set('#arr2',{x:'110vw',y:'-10vh',rotate:155,scaleY:-1});
+
+  const tl = gsap.timeline({
+    defaults:{ease:'power2.out'},
+    scrollTrigger:{
+      trigger:inh, start:'top top', end:()=>'+='+(innerHeight*N*1.1), pin:true, scrub:1, anticipatePin:1,
+      snap:{ snapTo:p=>{const i=Math.min(N-1,Math.max(0,Math.round(p*N-.5)));return (i+.5)/N}, duration:{min:.2,max:.6}, delay:.05, ease:'power1.inOut' },
+      onUpdate:self=>setActive(Math.min(N-1,Math.floor(self.progress*N)))
+    }
+  });
+
+  // flying arrows, like the reference video's drifting objects
+  tl.to('#arr1',{x:'95vw',y:'-30vh',rotate:-10,duration:N,ease:'none'},0)
+    .to('#arr2',{x:'-35vw',y:'85vh',rotate:175,duration:N,ease:'none'},0);
+
+  panels.forEach((p,i)=>{
+    const circ=p.querySelector('.circ'), a=p.querySelector('.p-a'), b=p.querySelector('.p-b'), num=p.querySelector('.num'), box=p.querySelector('.box');
+    const last = i===N-1;
+    // zoom IN
+    tl.set(p,{autoAlpha:1},i)
+      .fromTo(circ,{scale:.25,rotate:-14,opacity:0},{scale:1,rotate:0,opacity:1,duration:.5,ease:'back.out(1.3)'},i)
+      .fromTo([num,a],{y:50,opacity:0},{y:0,opacity:1,duration:.4,stagger:.05},i+.1)
+      .fromTo(b,{y:30,opacity:0,skewX:-8},{y:0,opacity:1,skewX:0,duration:.4},i+.22)
+      .fromTo(box,{y:40,opacity:0,scale:.94},{y:0,opacity:1,scale:1,duration:.35},i+.35);
+    // zoom OUT (the last one stays until the pin releases)
+    if(!last){
+      tl.to(circ,{scale:1.7,opacity:0,rotate:10,duration:.3,ease:'power2.in'},i+.7)
+        .to([num,a,b,box],{y:-40,opacity:0,duration:.25,ease:'power2.in'},i+.72)
+        .set(p,{autoAlpha:0},i+1);
+    }
+  });
+
+  dotEls.forEach(d=>d.addEventListener('click',()=>{
+    const st=tl.scrollTrigger, i=+d.dataset.i;
+    window.scrollTo({top:st.start+(st.end-st.start)*((i+.5)/N),behavior:'smooth'});
+  }));
+}
+</script>
+</body>
+</html>
